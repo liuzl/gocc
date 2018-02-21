@@ -19,7 +19,7 @@ func TestConvert(t *testing.T) {
 		if err != nil {
 			t.Errorf("New %s error:%+v", k, err)
 		}
-		t.Logf("%+v", s2t.DictFiles)
+		t.Logf("%+v", s2t.DictChains)
 
 		for _, c := range cases {
 			str, err := s2t.Convert(c)
