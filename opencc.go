@@ -20,6 +20,10 @@ type Group struct {
 	Dicts []*da.Dict
 }
 
+func (self *Group) String() string {
+	return fmt.Sprintf("%+v", self.Files)
+}
+
 type OpenCC struct {
 	Conversion  string
 	Description string
