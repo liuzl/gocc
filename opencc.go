@@ -2,6 +2,7 @@ package opencc
 
 import (
 	"encoding/json"
+	"flag"
 	"fmt"
 	"github.com/liuzl/da"
 	"io/ioutil"
@@ -10,7 +11,8 @@ import (
 	"strings"
 )
 
-const (
+var (
+	dir        = flag.String("dir", "/usr/local/share/gocc/", "dict dir")
 	CONFIG_DIR = "config"
 	DICT_DIR   = "dictionary"
 )
@@ -89,7 +91,7 @@ func (self *OpenCC) initDict() error {
 	if self.Conversion == "" {
 		return fmt.Errorf("conversion is not set")
 	}
-	configFile := filepath.Join(CONFIG_DIR, self.Conversion+".json")
+	configFile := filepath.Join(*dir, CONFIG_DIR, self.Conversion+".json")
 	body, err := ioutil.ReadFile(configFile)
 	if err != nil {
 		return err
@@ -169,7 +171,7 @@ func (self *OpenCC) addDictChain(d map[string]interface{}) (*Group, error) {
 			if !has {
 				return nil, fmt.Errorf("no file field found")
 			}
-			daDict, err := da.BuildFromFile(filepath.Join(DICT_DIR, file.(string)))
+			daDict, err := da.BuildFromFile(filepath.Join(*dir, DICT_DIR, file.(string)))
 			if err != nil {
 				return nil, err
 			}
