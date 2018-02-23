@@ -3,7 +3,7 @@
 ## Introduction 介紹
 gocc is a golang port of OpenCC([Open Chinese Convert 開放中文轉換](https://github.com/BYVoid/OpenCC/)) which is a project for conversion between Traditional and Simplified Chinese developed by [BYVoid](https://www.byvoid.com/).
 
-gocc stands for "**Go**lang verson Open**CC**", it is a total rewrite version of OpenCC by Go. It just borrows the dict files and config files of OpenCC, so it may not  produces the same output with the original OpenCC.
+gocc stands for "**Go**lang version Open**CC**", it is a total rewrite version of OpenCC by Go. It just borrows the dict files and config files of OpenCC, so it may not  produces the same output with the original OpenCC.
 
 ## Installation 安裝
 ### 1, golang package
