@@ -29,6 +29,7 @@ INSTALL_BIN=$(PREFIX)/bin
 INSTALL_DATA=$(PREFIX)/share/gocc
 
 build:
+	$(GOGET)
 	$(GOBUILD) -o $(BINARY_NAME)
 
 clean:
@@ -38,4 +39,4 @@ install: build
 	@mkdir -p $(INSTALL_BIN)
 	@mkdir -p $(INSTALL_DATA)
 	cp $(BINARY_NAME) $(INSTALL_BIN)
-	cp -fr ../../config ../../dictionary $(INSTALL_DATA)
+	cp -fr ../config ../dictionary $(INSTALL_DATA)
