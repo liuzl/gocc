@@ -13,9 +13,11 @@ go get github.com/liuzl/gocc
 ### 2, Command Line
 ```sh
 git clone https://github.com/liuzl/gocc
-cd gocc/tools/opencc
+cd gocc/cmd
 make install
 gocc --help
+echo "我们是工农子弟兵" | gocc
+#我們是工農子弟兵
 ```
 
 ## Usage 使用
