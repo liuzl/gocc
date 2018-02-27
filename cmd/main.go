@@ -45,7 +45,7 @@ func main() {
 		*config = "s2t"
 	}
 
-	conv, err := opencc.New(*config)
+	conv, err := gocc.New(*config)
 	if err != nil {
 		log.Fatal(err)
 	}

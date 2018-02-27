@@ -1,4 +1,4 @@
-package opencc
+package gocc
 
 import (
 	"encoding/json"

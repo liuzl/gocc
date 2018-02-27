@@ -1,4 +1,5 @@
-package opencc
+// Package gocc is a golang port of OpenCC(Open Chinese Convert 開放中文轉換)
+package gocc
 
 import (
 	"encoding/json"
