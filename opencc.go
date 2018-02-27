@@ -38,6 +38,9 @@ var conversions map[string]struct{} = map[string]struct{}{
 	"t2hk": {}, "t2s": {}, "t2tw": {}, "tw2s": {}, "tw2sp": {},
 }
 
+// New construct an instance of OpenCC.
+//
+// Supported conversions: s2t, t2s, s2tw, tw2s, s2hk, hk2s, s2twp, tw2sp, t2tw, t2hk
 func New(conversion string) (*OpenCC, error) {
 	if _, has := conversions[conversion]; !has {
 		return nil, fmt.Errorf("%s not valid", conversion)
