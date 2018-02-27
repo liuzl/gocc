@@ -13,27 +13,30 @@ import (
 )
 
 var (
-	dir        = flag.String("dir", "/usr/local/share/gocc/", "dict dir")
-	CONFIG_DIR = "config"
-	DICT_DIR   = "dictionary"
+	// parent dir for config and dictionary
+	Dir       = flag.String("dir", "/usr/local/share/gocc/", "dict dir")
+	configDir = "config"
+	dictDir   = "dictionary"
 )
 
+// A group of dicts
 type Group struct {
 	Files []string
 	Dicts []*da.Dict
 }
 
-func (self *Group) String() string {
-	return fmt.Sprintf("%+v", self.Files)
+func (g *Group) String() string {
+	return fmt.Sprintf("%+v", g.Files)
 }
 
+// OpenCC contains the converter
 type OpenCC struct {
 	Conversion  string
 	Description string
 	DictChains  []*Group
 }
 
-var conversions map[string]struct{} = map[string]struct{}{
+var conversions = map[string]struct{}{
 	"hk2s": {}, "s2hk": {}, "s2t": {}, "s2tw": {}, "s2twp": {},
 	"t2hk": {}, "t2s": {}, "t2tw": {}, "tw2s": {}, "tw2sp": {},
 }
@@ -54,8 +57,8 @@ func New(conversion string) (*OpenCC, error) {
 }
 
 // Convert string from Simplified Chinese to Traditional Chinese or vice versa
-func (self *OpenCC) Convert(in string) (string, error) {
-	for _, group := range self.DictChains {
+func (cc *OpenCC) Convert(in string) (string, error) {
+	for _, group := range cc.DictChains {
 		r := []rune(in)
 		var tokens []string
 		for i := 0; i < len(r); {
@@ -91,11 +94,11 @@ func (self *OpenCC) Convert(in string) (string, error) {
 	return in, nil
 }
 
-func (self *OpenCC) initDict() error {
-	if self.Conversion == "" {
+func (cc *OpenCC) initDict() error {
+	if cc.Conversion == "" {
 		return fmt.Errorf("conversion is not set")
 	}
-	configFile := filepath.Join(*dir, CONFIG_DIR, self.Conversion+".json")
+	configFile := filepath.Join(*Dir, configDir, cc.Conversion+".json")
 	body, err := ioutil.ReadFile(configFile)
 	if err != nil {
 		return err
@@ -110,7 +113,7 @@ func (self *OpenCC) initDict() error {
 	if !has {
 		return fmt.Errorf("name not found in %s", configFile)
 	}
-	self.Description = name.(string)
+	cc.Description = name.(string)
 	chain, has := config["conversion_chain"]
 	if !has {
 		return fmt.Errorf("conversion_chain not found in %s", configFile)
@@ -120,11 +123,11 @@ func (self *OpenCC) initDict() error {
 			if d, ok := v.(map[string]interface{}); ok {
 				if gdict, has := d["dict"]; has {
 					if dict, is := gdict.(map[string]interface{}); is {
-						group, err := self.addDictChain(dict)
+						group, err := cc.addDictChain(dict)
 						if err != nil {
 							return err
 						}
-						self.DictChains = append(self.DictChains, group)
+						cc.DictChains = append(cc.DictChains, group)
 					}
 				} else {
 					return fmt.Errorf("should have dict inside conversion_chain")
@@ -140,7 +143,7 @@ func (self *OpenCC) initDict() error {
 	return nil
 }
 
-func (self *OpenCC) addDictChain(d map[string]interface{}) (*Group, error) {
+func (cc *OpenCC) addDictChain(d map[string]interface{}) (*Group, error) {
 	t, has := d["type"]
 	if !has {
 		return nil, fmt.Errorf("type not found in %+v", d)
@@ -160,7 +163,7 @@ func (self *OpenCC) addDictChain(d map[string]interface{}) (*Group, error) {
 
 			for _, dict := range dicts {
 				if d, is := dict.(map[string]interface{}); is {
-					group, err := self.addDictChain(d)
+					group, err := cc.addDictChain(d)
 					if err != nil {
 						return nil, err
 					}
@@ -175,7 +178,7 @@ func (self *OpenCC) addDictChain(d map[string]interface{}) (*Group, error) {
 			if !has {
 				return nil, fmt.Errorf("no file field found")
 			}
-			daDict, err := da.BuildFromFile(filepath.Join(*dir, DICT_DIR, file.(string)))
+			daDict, err := da.BuildFromFile(filepath.Join(*Dir, dictDir, file.(string)))
 			if err != nil {
 				return nil, err
 			}

@@ -14,7 +14,7 @@ func TestConvert(t *testing.T) {
 		`乾隆爷是谁的干爷爷？乾爷爷吗？`,
 	}
 
-	for k, _ := range conversions {
+	for k := range conversions {
 		s2t, err := New(k)
 		if err != nil {
 			t.Errorf("New %s error:%+v", k, err)
