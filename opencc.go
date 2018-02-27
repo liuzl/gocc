@@ -13,13 +13,13 @@ import (
 )
 
 var (
-	// parent dir for config and dictionary
+	// Dir is the parent dir for config and dictionary
 	Dir       = flag.String("dir", "/usr/local/share/gocc/", "dict dir")
 	configDir = "config"
 	dictDir   = "dictionary"
 )
 
-// A group of dicts
+// Group holds a sequence of dicts
 type Group struct {
 	Files []string
 	Dicts []*da.Dict
@@ -188,7 +188,6 @@ func (cc *OpenCC) addDictChain(d map[string]interface{}) (*Group, error) {
 			return nil, fmt.Errorf("type should be txt or group")
 		}
 		return ret, nil
-	} else {
-		return nil, fmt.Errorf("type should be string")
 	}
+	return nil, fmt.Errorf("type should be string")
 }
