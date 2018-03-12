@@ -9,15 +9,23 @@ import (
 	"io/ioutil"
 	"path/filepath"
 	"reflect"
+	"runtime"
 	"strings"
 )
 
 var (
 	// Dir is the parent dir for config and dictionary
-	Dir       = flag.String("dir", "/usr/local/share/gocc/", "dict dir")
+	Dir       = flag.String("dir", defaultDir(), "dict dir")
 	configDir = "config"
 	dictDir   = "dictionary"
 )
+
+func defaultDir() string {
+	if runtime.GOOS == "windows" {
+		return `C:\gocc\`
+	}
+	return `/usr/local/share/gocc/`
+}
 
 // Group holds a sequence of dicts
 type Group struct {
