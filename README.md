@@ -26,8 +26,9 @@ package main
 
 import (
     "fmt"
-    "github.com/liuzl/gocc"
     "log"
+    
+    "github.com/liuzl/gocc"
 )
 
 func main() {
