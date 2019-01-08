@@ -2,6 +2,7 @@
 package gocc
 
 import (
+	"os"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -24,7 +25,11 @@ func defaultDir() string {
 	if runtime.GOOS == "windows" {
 		return `C:\gocc\`
 	}
-	return `/usr/local/share/gocc/`
+	if goPath, ok := os.LookupEnv("GOPATH"); ok {
+		return goPath + "/src/github.com/liuzl/gocc/"
+	} else {
+		return `/usr/local/share/gocc/`
+	}
 }
 
 // Group holds a sequence of dicts
