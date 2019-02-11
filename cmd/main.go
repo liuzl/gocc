@@ -62,6 +62,6 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		fmt.Fprintf(out, str)
+		fmt.Fprint(out, str)
 	}
 }
