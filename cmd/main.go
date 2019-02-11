@@ -4,10 +4,11 @@ import (
 	"bufio"
 	"flag"
 	"fmt"
-	"github.com/liuzl/gocc"
 	"io"
 	"log"
 	"os"
+
+	"github.com/liuzl/gocc"
 )
 
 var (

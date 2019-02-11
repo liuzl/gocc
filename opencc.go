@@ -2,16 +2,17 @@
 package gocc
 
 import (
-	"os"
 	"encoding/json"
 	"flag"
 	"fmt"
-	"github.com/liuzl/da"
 	"io/ioutil"
+	"os"
 	"path/filepath"
 	"reflect"
 	"runtime"
 	"strings"
+
+	"github.com/liuzl/da"
 )
 
 var (
