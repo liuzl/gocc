@@ -7,6 +7,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"strings"
 
 	"github.com/liuzl/gocc"
 )
@@ -51,18 +52,28 @@ func main() {
 		log.Fatal(err)
 	}
 
+	stop := false
 	for {
-		line, c := br.ReadString('\n')
-		if c == io.EOF {
+		if stop {
 			break
 		}
-		if c != nil {
+		line, c := br.ReadString('\n')
+		if c == io.EOF {
+			stop = true
+		} else if c != nil {
 			log.Fatal(c)
+		}
+		line = strings.TrimSuffix(line, "\n")
+		if line == "" {
+			if !stop {
+				fmt.Fprint(out, "\n")
+			}
+			continue
 		}
 		str, err := conv.Convert(line)
 		if err != nil {
 			log.Fatal(err)
 		}
-		fmt.Fprint(out, str)
+		fmt.Fprint(out, str+"\n")
 	}
 }
