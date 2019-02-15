@@ -4,12 +4,11 @@ import (
 	"bufio"
 	"flag"
 	"fmt"
-	"io"
 	"log"
 	"os"
-	"strings"
 
 	"github.com/liuzl/gocc"
+	"github.com/liuzl/goutil"
 )
 
 var (
@@ -52,28 +51,16 @@ func main() {
 		log.Fatal(err)
 	}
 
-	stop := false
-	for {
-		if stop {
-			break
-		}
-		line, c := br.ReadString('\n')
-		if c == io.EOF {
-			stop = true
-		} else if c != nil {
-			log.Fatal(c)
-		}
-		line = strings.TrimSuffix(line, "\n")
-		if line == "" {
-			if !stop {
-				fmt.Fprint(out, "\n")
-			}
-			continue
-		}
-		str, err := conv.Convert(line)
-		if err != nil {
-			log.Fatal(err)
+	err = goutil.ForEachLine(br, func(line string) error {
+		str, e := conv.Convert(line)
+		if e != nil {
+			return e
 		}
 		fmt.Fprint(out, str+"\n")
+		return nil
+	})
+
+	if err != nil {
+		log.Fatal(err)
 	}
 }
