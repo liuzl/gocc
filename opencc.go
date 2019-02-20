@@ -72,12 +72,12 @@ func New(conversion string) (*OpenCC, error) {
 
 // Convert string from Simplified Chinese to Traditional Chinese or vice versa
 func (cc *OpenCC) Convert(in string) (string, error) {
+	var token string
 	for _, group := range cc.DictChains {
 		r := []rune(in)
 		var tokens []string
 		for i := 0; i < len(r); {
 			s := r[i:]
-			var token string
 			max := 0
 			for _, dict := range group.Dicts {
 				ret, err := dict.PrefixMatch(string(s))
