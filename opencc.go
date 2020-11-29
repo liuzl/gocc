@@ -17,10 +17,16 @@ import (
 
 var (
 	// Dir is the parent dir for config and dictionary
-	Dir       = flag.String("dir", defaultDir(), "dict dir")
-	configDir = "config"
-	dictDir   = "dictionary"
+	Dir        = flag.String("dir", defaultDir(), "dict dir")
+	configPath = ""
+	configDir  = "config"
+	dictDir    = "dictionary"
 )
+
+// SetConfigPath set global config path
+func SetConfigPath(path string) {
+	configPath = path
+}
 
 func defaultDir() string {
 	if runtime.GOOS == "windows" {
@@ -112,7 +118,12 @@ func (cc *OpenCC) initDict() error {
 	if cc.Conversion == "" {
 		return fmt.Errorf("conversion is not set")
 	}
-	configFile := filepath.Join(*Dir, configDir, cc.Conversion+".json")
+	var configFile string
+	if configPath != "" {
+		configFile = filepath.Join(configPath, configDir, cc.Conversion+".json")
+	} else {
+		configFile = filepath.Join(*Dir, configDir, cc.Conversion+".json")
+	}
 	body, err := ioutil.ReadFile(configFile)
 	if err != nil {
 		return err
@@ -192,7 +203,13 @@ func (cc *OpenCC) addDictChain(d map[string]interface{}) (*Group, error) {
 			if !has {
 				return nil, fmt.Errorf("no file field found")
 			}
-			daDict, err := da.BuildFromFile(filepath.Join(*Dir, dictDir, file.(string)))
+			var daFile string
+			if configPath != "" {
+				daFile = filepath.Join(configPath, dictDir, file.(string))
+			} else {
+				daFile = filepath.Join(*Dir, dictDir, file.(string))
+			}
+			daDict, err := da.BuildFromFile(daFile)
 			if err != nil {
 				return nil, err
 			}
