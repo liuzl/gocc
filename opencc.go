@@ -9,9 +9,9 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
-	"runtime"
 	"strings"
 
+	"github.com/hi20160616/gears"
 	"github.com/liuzl/da"
 )
 
@@ -23,14 +23,22 @@ var (
 )
 
 func defaultDir() string {
-	if runtime.GOOS == "windows" {
-		return `C:\gocc\`
-	}
 	if goPath, ok := os.LookupEnv("GOPATH"); ok {
-		return goPath + "/src/github.com/liuzl/gocc/"
-	} else {
-		return `/usr/local/share/gocc/`
+		//judge whether the path exists
+		//goPath + "/src/github.com/liuzl/gocc/" or "/pkg/mod/github.com/liuzl/gocc/"
+		//if those path do not exist, return current work dir
+		p := goPath + "/src/github.com/liuzl/gocc/"
+		if gears.Exists(p) {
+			return p
+		} else if p = goPath + "/pkg/mod/github.com/liuzl/gocc?/"; gears.Exists(p) {
+			return p
+		}
 	}
+	path, err := os.Getwd()
+	if err != nil {
+		return ""
+	}
+	return path + "/internal/gocc/"
 }
 
 // Group holds a sequence of dicts
