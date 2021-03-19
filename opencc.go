@@ -25,12 +25,12 @@ var (
 func defaultDir() string {
 	if goPath, ok := os.LookupEnv("GOPATH"); ok {
 		//judge whether the path exists
-		//goPath + "/src/github.com/liuzl/gocc/" or "/pkg/mod/github.com/liuzl/gocc/"
+		//goPath + "/src/github.com/hycka/gocc/" or "/pkg/mod/github.com/hycka/gocc/"
 		//if those path do not exist, return current work dir
-		p := goPath + "/src/github.com/liuzl/gocc/"
+		p := goPath + "/src/github.com/hycka/gocc/"
 		if gears.Exists(p) {
 			return p
-		} else if p = goPath + "/pkg/mod/github.com/liuzl/gocc?/"; gears.Exists(p) {
+		} else if p = goPath + "/pkg/mod/github.com/hycka/gocc?/"; gears.Exists(p) {
 			return p
 		}
 	}
