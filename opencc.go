@@ -9,36 +9,54 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"regexp"
 	"strings"
 
-	"github.com/hi20160616/gears"
 	"github.com/liuzl/da"
 )
 
 var (
 	// Dir is the parent dir for config and dictionary
-	Dir       = flag.String("dir", defaultDir(), "dict dir")
+	Dir       = flag.String("dir", DefaultDir(), "dict dir")
 	configDir = "config"
 	dictDir   = "dictionary"
 )
 
-func defaultDir() string {
+//traverse folder, and determine whether it matches '^gocc.*'
+func matchfolder(p ...string) (bool, string) {
+	for _, path := range p {
+		files, _ := ioutil.ReadDir(path)
+		for _, f := range files {
+			if f.IsDir() {
+				fmt.Println(f.Name())
+				match, _ := regexp.MatchString("^gocc.*", f.Name())
+				if match {
+					return true, path + f.Name()
+				}
+			}
+		}
+	}
+	return false, ""
+}
+
+func DefaultDir() string {
 	if goPath, ok := os.LookupEnv("GOPATH"); ok {
 		//judge whether the path exists
 		//goPath + "/src/github.com/hycka/gocc/" or "/pkg/mod/github.com/hycka/gocc/"
 		//if those path do not exist, return current work dir
-		p := goPath + "/src/github.com/hycka/gocc?/"
-		if gears.Exists(p) {
-			return p
-		} else if p = goPath + "/pkg/mod/github.com/hycka/gocc?/"; gears.Exists(p) {
-			return p
+		p := goPath + "/src/github.com/hycka/"
+		//traverse folder, and determine whether it matches '^gocc.*'
+		bExist, tmp := matchfolder(p, goPath+"/pkg/mod/github.com/hycka/")
+		if bExist {
+			return tmp + "/"
 		}
+		return p
 	}
 	path, err := os.Getwd()
 	if err != nil {
 		return ""
 	}
-	return path + "/internal/gocc/"
+	return path + "/gocc/"
 }
 
 // Group holds a sequence of dicts

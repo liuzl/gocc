@@ -30,3 +30,7 @@ func TestConvert(t *testing.T) {
 		}
 	}
 }
+
+func TestDefaultDir(t *testing.T) {
+	DefaultDir()
+}
