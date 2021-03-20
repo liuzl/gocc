@@ -50,7 +50,6 @@ func DefaultDir() string {
 		if bExist {
 			return tmp + "/"
 		}
-		return p
 	}
 	path, err := os.Getwd()
 	if err != nil {
