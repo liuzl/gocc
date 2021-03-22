@@ -2,18 +2,25 @@
 package gocc
 
 import (
+	"bytes"
+	"embed"
+	_ "embed"
 	"encoding/json"
 	"flag"
 	"fmt"
-	"io/ioutil"
-	"os"
-	"path/filepath"
 	"reflect"
-	"regexp"
 	"strings"
 
 	"github.com/liuzl/da"
+
+	_ "embed"
 )
+
+//go:embed config/*
+var configs embed.FS
+
+//go:embed dictionary/*
+var dicts embed.FS
 
 var (
 	// Dir is the parent dir for config and dictionary
@@ -22,40 +29,8 @@ var (
 	dictDir   = "dictionary"
 )
 
-//traverse folder, and determine whether it matches '^gocc.*'
-func matchfolder(p ...string) (bool, string) {
-	for _, path := range p {
-		files, _ := ioutil.ReadDir(path)
-		for _, f := range files {
-			if f.IsDir() {
-				fmt.Println(f.Name())
-				match, _ := regexp.MatchString("^gocc.*", f.Name())
-				if match {
-					return true, path + f.Name()
-				}
-			}
-		}
-	}
-	return false, ""
-}
-
 func DefaultDir() string {
-	if goPath, ok := os.LookupEnv("GOPATH"); ok {
-		//judge whether the path exists
-		//goPath + "/src/github.com/hycka/gocc/" or "/pkg/mod/github.com/hycka/gocc/"
-		//if those path do not exist, return current work dir
-		p := goPath + "/src/github.com/hycka/"
-		//traverse folder, and determine whether it matches '^gocc.*'
-		bExist, tmp := matchfolder(p, goPath+"/pkg/mod/github.com/hycka/")
-		if bExist {
-			return tmp + "/"
-		}
-	}
-	path, err := os.Getwd()
-	if err != nil {
-		return ""
-	}
-	return path + "/gocc/"
+	return "/gocc/"
 }
 
 // Group holds a sequence of dicts
@@ -137,8 +112,8 @@ func (cc *OpenCC) initDict() error {
 	if cc.Conversion == "" {
 		return fmt.Errorf("conversion is not set")
 	}
-	configFile := filepath.Join(*Dir, configDir, cc.Conversion+".json")
-	body, err := ioutil.ReadFile(configFile)
+	configFile := "test"
+	body, err := configs.ReadFile("config/" + cc.Conversion + ".json")
 	if err != nil {
 		return err
 	}
@@ -217,7 +192,15 @@ func (cc *OpenCC) addDictChain(d map[string]interface{}) (*Group, error) {
 			if !has {
 				return nil, fmt.Errorf("no file field found")
 			}
-			daDict, err := da.BuildFromFile(filepath.Join(*Dir, dictDir, file.(string)))
+			// daDict, err := da.BuildFromFile(filepath.Join(*Dir, dictDir, file.(string)))
+			dictfile, err := dicts.ReadFile("dictionary/" + file.(string))
+			if err != nil {
+				return nil, err
+			}
+			//trans byte[] to io.Reader
+			reader := bytes.NewReader(dictfile)
+			daDict, err := da.Build(reader)
+
 			if err != nil {
 				return nil, err
 			}
