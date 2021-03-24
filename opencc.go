@@ -2,35 +2,35 @@
 package gocc
 
 import (
+	"bytes"
+	"embed"
+	_ "embed"
 	"encoding/json"
 	"flag"
 	"fmt"
-	"io/ioutil"
-	"os"
-	"path/filepath"
 	"reflect"
-	"runtime"
 	"strings"
 
 	"github.com/liuzl/da"
+
+	_ "embed"
 )
+
+//go:embed config/*
+var configs embed.FS
+
+//go:embed dictionary/*
+var dicts embed.FS
 
 var (
 	// Dir is the parent dir for config and dictionary
-	Dir       = flag.String("dir", defaultDir(), "dict dir")
+	Dir       = flag.String("dir", DefaultDir(), "dict dir")
 	configDir = "config"
 	dictDir   = "dictionary"
 )
 
-func defaultDir() string {
-	if runtime.GOOS == "windows" {
-		return `C:\gocc\`
-	}
-	if goPath, ok := os.LookupEnv("GOPATH"); ok {
-		return goPath + "/src/github.com/liuzl/gocc/"
-	} else {
-		return `/usr/local/share/gocc/`
-	}
+func DefaultDir() string {
+	return "/gocc/"
 }
 
 // Group holds a sequence of dicts
@@ -112,8 +112,8 @@ func (cc *OpenCC) initDict() error {
 	if cc.Conversion == "" {
 		return fmt.Errorf("conversion is not set")
 	}
-	configFile := filepath.Join(*Dir, configDir, cc.Conversion+".json")
-	body, err := ioutil.ReadFile(configFile)
+	configFile := "test"
+	body, err := configs.ReadFile("config/" + cc.Conversion + ".json")
 	if err != nil {
 		return err
 	}
@@ -192,7 +192,15 @@ func (cc *OpenCC) addDictChain(d map[string]interface{}) (*Group, error) {
 			if !has {
 				return nil, fmt.Errorf("no file field found")
 			}
-			daDict, err := da.BuildFromFile(filepath.Join(*Dir, dictDir, file.(string)))
+			// daDict, err := da.BuildFromFile(filepath.Join(*Dir, dictDir, file.(string)))
+			dictfile, err := dicts.ReadFile("dictionary/" + file.(string))
+			if err != nil {
+				return nil, err
+			}
+			//trans byte[] to io.Reader
+			reader := bytes.NewReader(dictfile)
+			daDict, err := da.Build(reader)
+
 			if err != nil {
 				return nil, err
 			}
