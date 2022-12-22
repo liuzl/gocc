@@ -2,39 +2,22 @@
 package gocc
 
 import (
+	"embed"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"os"
-	"path/filepath"
+	"path"
 	"reflect"
-	"runtime"
 	"strings"
 
 	"github.com/liuzl/da"
 )
 
-var (
-	configDir = "config"
-	dictDir   = "dictionary"
-)
-var defaultDir string
+//go:embed config
+var config embed.FS
 
-func DefaultDir() string {
-	if defaultDir == `` {
-		return defaultDir
-	}
-	if runtime.GOOS == "windows" {
-		defaultDir = `C:\gocc\`
-		return defaultDir
-	}
-	if goPath, ok := os.LookupEnv("GOPATH"); ok {
-		defaultDir = goPath + "/src/github.com/liuzl/gocc/"
-	} else {
-		defaultDir = `/usr/local/share/gocc/`
-	}
-	return defaultDir
-}
+//go:embed dictionary
+var dict embed.FS
 
 // Group holds a sequence of dicts
 type Group struct {
@@ -61,17 +44,13 @@ var conversions = map[string]struct{}{
 // New construct an instance of OpenCC.
 //
 // Supported conversions: s2t, t2s, s2tw, tw2s, s2hk, hk2s, s2twp, tw2sp, t2tw, t2hk
-func New(conversion string, option ...Option) (*OpenCC, error) {
+func New(conversion string) (*OpenCC, error) {
 	if _, has := conversions[conversion]; !has {
 		return nil, fmt.Errorf("%s not valid", conversion)
 	}
-	opts := defaultOptions
-	for _, o := range option {
-		o.apply(&opts)
-	}
 
 	cc := &OpenCC{Conversion: conversion}
-	err := cc.initDict(&opts)
+	err := cc.initDict()
 	if err != nil {
 		return nil, err
 	}
@@ -115,18 +94,13 @@ func (cc *OpenCC) Convert(in string) (string, error) {
 	}
 	return in, nil
 }
-func (cc *OpenCC) join(root, dir, name string) string {
-	if root == `` {
-		return filepath.Join(dir, name)
-	}
-	return filepath.Clean(filepath.Join(root, dir, name))
-}
-func (cc *OpenCC) initDict(opts *options) error {
+
+func (cc *OpenCC) initDict() error {
 	if cc.Conversion == "" {
 		return fmt.Errorf("conversion is not set")
 	}
-	configFile := cc.join(opts.dir, configDir, cc.Conversion+".json")
-	rc, err := opts.loader.Open(configFile)
+	configFile := path.Join("config", cc.Conversion+".json")
+	rc, err := config.Open(configFile)
 	if err != nil {
 		return err
 	}
@@ -155,7 +129,7 @@ func (cc *OpenCC) initDict(opts *options) error {
 			if d, ok := v.(map[string]interface{}); ok {
 				if gdict, has := d["dict"]; has {
 					if dict, is := gdict.(map[string]interface{}); is {
-						group, err := cc.addDictChain(dict, opts)
+						group, err := cc.addDictChain(dict)
 						if err != nil {
 							return err
 						}
@@ -175,7 +149,7 @@ func (cc *OpenCC) initDict(opts *options) error {
 	return nil
 }
 
-func (cc *OpenCC) addDictChain(d map[string]interface{}, opts *options) (*Group, error) {
+func (cc *OpenCC) addDictChain(d map[string]interface{}) (*Group, error) {
 	t, has := d["type"]
 	if !has {
 		return nil, fmt.Errorf("type not found in %+v", d)
@@ -195,7 +169,7 @@ func (cc *OpenCC) addDictChain(d map[string]interface{}, opts *options) (*Group,
 
 			for _, dict := range dicts {
 				if d, is := dict.(map[string]interface{}); is {
-					group, err := cc.addDictChain(d, opts)
+					group, err := cc.addDictChain(d)
 					if err != nil {
 						return nil, err
 					}
@@ -210,8 +184,8 @@ func (cc *OpenCC) addDictChain(d map[string]interface{}, opts *options) (*Group,
 			if !has {
 				return nil, fmt.Errorf("no file field found")
 			}
-			filename := cc.join(opts.dir, dictDir, file.(string))
-			rc, err := opts.loader.Open(filename)
+			filename := path.Join("dictionary", file.(string))
+			rc, err := dict.Open(filename)
 			if err != nil {
 				return nil, err
 			}

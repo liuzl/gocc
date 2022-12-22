@@ -26,7 +26,6 @@ BINARY_NAME=gocc
 
 PREFIX?=/usr/local
 INSTALL_BIN=$(PREFIX)/bin
-INSTALL_DATA=$(PREFIX)/share/gocc
 
 build:
 	$(GOGET)
@@ -37,6 +36,4 @@ clean:
 
 install: build
 	@mkdir -p $(INSTALL_BIN)
-	@mkdir -p $(INSTALL_DATA)
 	cp $(BINARY_NAME) $(INSTALL_BIN)
-	cp -fr ../config ../dictionary $(INSTALL_DATA)
