@@ -5,12 +5,12 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	"github.com/liuzl/da"
 	"io/ioutil"
 	"path"
 	"reflect"
 	"strings"
-
-	"github.com/liuzl/da"
+	"unicode/utf8"
 )
 
 //go:embed config
@@ -61,13 +61,16 @@ func New(conversion string) (*OpenCC, error) {
 func (cc *OpenCC) Convert(in string) (string, error) {
 	var token string
 	for _, group := range cc.DictChains {
-		r := []rune(in)
 		var tokens []string
-		for i := 0; i < len(r); {
-			s := r[i:]
+		var i int
+		for j, r := range in {
+			if i > j {
+				continue
+			}
+			s := in[j:]
 			max := 0
 			for _, dict := range group.Dicts {
-				ret, err := dict.PrefixMatch(string(s))
+				ret, err := dict.PrefixMatch(s)
 				if err != nil {
 					return "", err
 				}
@@ -80,13 +83,13 @@ func (cc *OpenCC) Convert(in string) (string, error) {
 							o = k
 						}
 					}
-					i += len([]rune(o))
+					i += len(o)
 					break
 				}
 			}
 			if max == 0 { //no match
-				token = string(r[i])
-				i++
+				token = string(r)
+				i += utf8.RuneLen(r)
 			}
 			tokens = append(tokens, token)
 		}
